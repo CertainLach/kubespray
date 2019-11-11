@@ -1,0 +1,23 @@
+---
+#  raw: cat /etc/issue.net | grep '{{ bootstrap_versions }}'
+
+- name: Bootstrap | Check if bootstrap is needed
+  raw: which python
+  register: need_bootstrap
+  failed_when: false
+  changed_when: false
+  check_mode: false
+  environment: {}
+  tags: facts
+
+- name: Bootstrap | Install python
+  raw:
+    pacman -Sy && \
+    pacman -S --noconfirm python
+  when:
+    need_bootstrap.rc != 0
+
+- name: Create directory /etc/bash_completion.d
+  file:
+    path: /etc/bash_completion.d
+    state: directory
