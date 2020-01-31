@@ -16,12 +16,14 @@
 
 - name: Stop if unknown OS
   assert:
-    that: ansible_os_family in ['RedHat', 'CentOS', 'Fedora', 'Ubuntu', 'Debian', 'CoreOS', 'Container Linux by CoreOS', 'Suse', 'ClearLinux', 'OracleLinux', 'Archlinux']
+    that: ansible_os_family in ['RedHat', 'CentOS', 'Fedora', 'Ubuntu', 'Debian', 'CoreOS', 'Coreos', 'Container Linux by CoreOS', 'Suse', 'ClearLinux', 'OracleLinux', 'Archlinux']
+    msg: "{{ ansible_os_family }} is not a known OS"
   ignore_errors: "{{ ignore_assert_errors }}"
 
 - name: Stop if unknown network plugin
   assert:
     that: kube_network_plugin in ['calico', 'canal', 'flannel', 'weave', 'cloud', 'cilium', 'cni', 'contiv', 'kube-ovn', 'kube-router', 'macvlan']
+    msg: "{{ kube_network_plugin }} is not supported"
   when: kube_network_plugin is defined
   ignore_errors: "{{ ignore_assert_errors }}"
 
@@ -39,7 +41,7 @@
   ignore_errors: "{{ ignore_assert_errors }}"
 
 # simplify this items-list when   https://github.com/ansible/ansible/issues/15753  is resolved
-- name: "Stop if known booleans are set as strings (Use JSON format on CLI: -e \"{'key': true }\")"
+- name: 'Stop if known booleans are set as strings (Use JSON format on CLI: -e "{''key'': true }")'
   assert:
     that: item.value|type_debug == 'bool'
     msg: "{{ item.value }} isn't a bool"
@@ -161,7 +163,7 @@
     msg: "Your version of calico is not fresh enough for upgrade. Minimum version v2.6.5"
   when:
     - kube_network_plugin == 'calico'
-    - 'calico_version_on_server.stdout is defined'
+    - "calico_version_on_server.stdout is defined"
     - calico_version_on_server.stdout
     - inventory_hostname == groups['kube-master'][0]
   run_once: yes
